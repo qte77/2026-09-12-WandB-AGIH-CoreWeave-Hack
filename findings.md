@@ -12,12 +12,28 @@ is still the live source of truth for what's built/next; this file is the resear
 - Location: CoreWeave Office, 400 Alabama St, SF. Registration confirmed.
 - Theme (verbatim, matches MAS-GraphJudge's actual thesis): "observe, evaluate, track, document,
   and self-improve agent iterations."
-- Two prize tracks: **Best Loop Design** (awarded 9/13 on-site) and **Most Production-Ready**
-  (awarded ~2 weeks later at Fully Connected, Sept 29-Oct 1) — target track, ~80/20 over Best Loop
-  Design. **Unconfirmed**: whether that track judges the Sunday snapshot or live repo state at
-  Fully Connected — ask on-site (plan's B2).
+- **Seven prize tracks** (corrected 2026-09-12 from the live event page — previously this file
+  tracked only two): **Best Loop Design** (robot dog ~$4k + $2k cash, awarded 9/13 on-site),
+  **Most Production-Ready** (F1 tickets ~$1-2k/ticket + $1k cash, awarded ~2 weeks later at Fully
+  Connected, Sept 29-Oct 1 — target track, ~80/20 over Best Loop Design), **Best Use of Weave**
+  ($1,000), **Best Use of ARIA** ($1,000), **Best Use of marimo** ($500), **Best Social Media
+  demo** ($1,000), **Best Use of TypeSafe AI** (2 HF Microducks + ~$1k swag). **Unconfirmed**:
+  whether Most-Production-Ready judges the Sunday snapshot or live repo state at Fully Connected —
+  ask on-site (plan's B2).
 - Acceptance criterion stated on the page favors hackers with an existing project to point to —
   consistent with using the real `RDI-AgentBeats-MAS-GraphJudge` repo rather than starting fresh.
+- **Judges, 10 total (named 2026-09-12; previously 5 were "announced soon")**: AGI House side —
+  Jinjing/Jinjing Liang (co-founder/CEO Stably AI, YC W2026, AI-generated self-healing E2E tests —
+  direct domain overlap with "catching their own mistakes"), Kshitij Dixit (Co-Founder/CEO Zeo
+  Auto/Zeo Route Planner), Shivank Joshi (Partner at The Foundery; "Exploring Capital" per the
+  event page is likely "Exploring Minds," a podcast — don't misquote back to them), Venkatarao
+  Rebba (ML Engineer at Meta, Gen AI/LLM), Xiangyi Li (Founder @BenchFlow — agent-skill
+  benchmarking, SkillsBench/ClawsBench — direct domain overlap with our evaluation framing).
+  Sponsor side — Emmanuel Turlay (Director of Engineering, CoreWeave, **leads the Weave team**,
+  publicly posts on agent-first observability for multi-turn/tool-call semantics — matches our
+  Tier-4 framing closely), Lorenzo Porras (W&B), Julia Rose (ARIA team, W&B), Konstantin Taletskiy
+  (marimo), Mo Tiwari (Google; "DeepMind" per the event page unconfirmed independently — don't
+  overclaim in the pitch). Xiangyi Li and Jinjing are worth naming deliberately in the pitch.
 
 ## Sponsor stack — verified first-party, not from memory
 
@@ -25,11 +41,20 @@ is still the live source of truth for what's built/next; this file is the resear
 - **W&B Sandboxes**: serverless isolated execution, auto-correlates Weave traces to the run that
   produced them — the concrete answer to "where do critique-refine iterations actually run."
   Launched May 2026.
-- **ARIA**: CoreWeave's own coding agent; it *analyzes already-logged W&B run data*, it is not
-  integrable infrastructure for this build — secondary demo-mention beat only, not core plumbing.
-- **marimo/molab**: free RTX Pro 6000 Blackwell GPU notebooks, 12hr session cap. Not needed — the
-  critique-refine loop design has no weight training in scope, so no GPU dependency.
-- **TypeSafe AI** (Bronze sponsor): no public API found. Don't build against it.
+- **ARIA**: re-verified 2026-09-12 — a chat-in-sidebar agent inside an opened W&B project, **UI-only,
+  no API/programmatic invocation**, public preview since June 2026. It reads **classic
+  `wandb.log()` Experiment Runs** (training code, logs, loss curves, metrics, artifacts,
+  checkpoints) — **not confirmed to ingest Weave traces**. Since "Best Use of ARIA" is now a named
+  $1,000 track (not just a demo beat), and the plan's A6b only instruments `@weave.op`, **the plan
+  as written likely does not clear this track** — needs a small classic-Run logging add-on (see
+  plan's new table row).
+- **marimo/molab**: re-verified 2026-09-12, numbers confirmed exactly — free RTX Pro 6000
+  Blackwell (96GB VRAM) notebooks, 12hr hard session cap, 90min idle auto-shutdown, default 4
+  CPU/32GB RAM. No GPU dependency in our plan (no weight training in scope), so this remains a pure
+  optional add-on — now relevant only because "Best Use of marimo" ($500) is a named track.
+- **TypeSafe AI** (Bronze sponsor): **re-confirmed 2026-09-12 via direct fetch of typesafe.ai** —
+  company is "operating in stealth," no public API/SDK/pricing/product name. Don't build against
+  it; skip the "Best Use of TypeSafe AI" track — there's nothing to integrate.
 
 ## What got rejected, and why (don't re-litigate without new information)
 
@@ -74,6 +99,24 @@ guardrails, which already do real-time block/regenerate on a live evaluator scor
 still-standing differentiation: MAS-GraphJudge judges the *structure of a whole multi-step task*
 (a graph over the tool-call sequence) rather than a single output/message, and corrects the *same
 in-progress task* via a steering primitive rather than discarding and regenerating one output.
+
+## Unexpected value — cheap side-track adds found 2026-09-12 (don't divert from Most-Production-Ready)
+
+Ranked by payoff/effort, riding on top of plan items already in scope — added as plan table rows
+A6d/A8 rather than duplicated here in full:
+
+1. Log a classic `wandb.log()` Run alongside the existing `@weave.op` instrumentation (rides on
+   A6b, ~15 min) — makes "Best Use of ARIA" actually winnable (ARIA can only read classic Runs, not
+   Weave traces) and doubles as a strong production-readiness demo beat (dogfooding the sponsor's
+   own agent on our own agent's data).
+2. A ~30-45 min marimo/molab notebook visualizing Tier-1 graph metrics or the Weave trace timeline
+   (no GPU needed, so no risk from the 12hr cap) — clears "Best Use of marimo" ($500) using data
+   A3/A4 already produce, no new engineering surface.
+3. Zero-cost: name-drop Xiangyi Li (BenchFlow) and Jinjing (Stably AI) deliberately in the pitch —
+   frame Tier1-4 as the same agent-self-verification problem they've built companies around,
+   applied structurally (graph) instead of per-output. Pitch/demo-script change only, folds into C3.
+4. Lower priority, skip unless time remains: Best Social Media demo ($1,000) — a short clip of the
+   robot dog/humanoid + one line on the loop; owner-gated content task, not agent build time.
 
 ## Git/infra state as of 2026-09-12
 

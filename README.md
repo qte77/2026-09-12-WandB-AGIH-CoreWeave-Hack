@@ -32,8 +32,18 @@ See the plan's own **Remaining-work table** (single source of truth) plus:
 
 ## Target
 
-Track: Most Production-Ready (~80/20 over Best Loop Design). Vehicle: `RDI-AgentBeats-MAS-GraphJudge`
-— Tier 4 oversight/mid-turn-steering (Astra) + a critique-refine loop over existing Tier1/Tier2
-evaluators, instrumented with W&B Weave + run in W&B Sandboxes, OpenRouter as fallback provider.
-Not claimed as a novel loop shape (Self-Refine/Reflexion lineage) — the defensible claim is
-interpretable post-hoc graph metrics feeding prompt/behavior refinement, no training/weights.
+Primary track: Most Production-Ready (~80/20 over Best Loop Design), of **7 total tracks** — see
+`findings.md` for the full list and the 2 near-free side-track adds (ARIA, marimo) worth stacking.
+Vehicle: `RDI-AgentBeats-MAS-GraphJudge` — Tier 4 oversight/mid-turn-steering (Astra) + a
+critique-refine loop over existing Tier1/Tier2 evaluators, instrumented with W&B Weave + run in
+W&B Sandboxes, OpenRouter as fallback provider. Not claimed as a novel loop shape (Self-Refine/
+Reflexion lineage) — the defensible claim is interpretable post-hoc graph metrics feeding
+prompt/behavior refinement, no training/weights.
+
+## Repo state (2026-09-12)
+
+This folder is now pushed to `origin` (`qte77/2026-09-12-WandB-AGIH-CoreWeave-Hack`) — PR #1 open
+with these working notes. `RDI-AgentBeats-MAS-GraphJudge`'s plan 0001 has PR #20 open with the
+critique-refine pivot + track/judge-alignment corrections. **Still open: whether this repo stays a
+submission wrapper (docs + demo links, code stays in the vehicle repo) or becomes the actual build
+location** — ask before assuming either way if resuming this session.

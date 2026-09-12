@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     openrouter_model: str  # pick one at https://openrouter.ai/models, e.g. "anthropic/claude-sonnet-5"
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
 
+    # Draft-then-verify-then-escalate cascade (same pattern as TypeSafe's own "SDE
+    # cascade" cookbook): a small/cheap model drafts the first attempt, the full model
+    # only gets invoked to refine on an actual failure. Falls back to openrouter_model
+    # when unset, so the cascade is opt-in, not a required config change.
+    openrouter_draft_model: str | None = None
+
     # TypeSafe reads TYPESAFE_API_KEY itself (see triage.py) — kept here too so
     # get_settings() fails fast with a clear "missing" error if it's absent.
     typesafe_api_key: str

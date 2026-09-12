@@ -74,6 +74,12 @@ def run_all() -> list[TaskOutcome]:
         project=settings.wandb_project,
         job_type="critique-refine-loop",
     )
+    wandb.config.update(
+        {
+            "draft_model": settings.openrouter_draft_model or settings.openrouter_model,
+            "refine_model": settings.openrouter_model,
+        }
+    )
 
     outcomes = [run_task(llm_client, typesafe_client, settings, task) for task in TASKS]
 

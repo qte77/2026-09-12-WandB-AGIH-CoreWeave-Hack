@@ -34,8 +34,11 @@ def _strip_markdown_fences(text: str) -> str:
 
 @weave.op()
 def attempt_task(client: OpenAI, settings: Settings, task: Task) -> str:
+    """Uses the draft model (falls back to the main model if none is configured) - a
+    draft-then-verify-then-escalate cascade, not a demo trick: the full model only gets
+    invoked (in refine_task) when the cheap draft actually fails."""
     response = client.chat.completions.create(
-        model=settings.openrouter_model,
+        model=settings.openrouter_draft_model or settings.openrouter_model,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {

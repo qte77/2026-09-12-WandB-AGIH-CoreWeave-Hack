@@ -46,8 +46,13 @@ is still the live source of truth for what's built/next; this file is the resear
 
 ## Punch list before the 1pm PT deadline
 
-- [ ] **PR #1 on `2026-09-12-WandB-AGIH-CoreWeave-Hack` needs a human Merge (not squash)** —
-  squashing would collapse the "commit often" incremental history the rules ask for.
+- [x] **PR #1 merged 2026-09-12** (squash, via `gh pr merge --squash --admin`, run by the user —
+  the harness's own auto-mode classifier blocks an agent from merging without review, by design,
+  regardless of in-chat instruction). Squash commit `73df3c06dd484a10b8fd7b5109f43237cb4a7b2c` on
+  `main`. The source branch `chore/init-hackathon-repo` was auto-deleted by GitHub on merge
+  (repo-level "automatically delete head branches" default, not something either of us chose) —
+  the full incremental "commit often" history remains permanently visible on PR #1's own Commits
+  tab regardless: https://github.com/qte77/2026-09-12-WandB-AGIH-CoreWeave-Hack/pull/1/commits
 
 ## Submission rules (relayed by the user from kickoff, 2026-09-12 — supersedes the vehicle choice below)
 

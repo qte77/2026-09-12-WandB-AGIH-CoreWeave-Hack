@@ -54,8 +54,10 @@ def run_task(
     return TaskOutcome(task_id=task.id, passed=result.passed, iterations_used=iteration)
 
 
-@weave.op()
 def run_all() -> list[TaskOutcome]:
+    """Driver, not a traced op: it calls weave.init() itself, so tracing isn't live yet
+    when it starts. The real units of work (run_task and everything it calls) are traced.
+    """
     settings = get_settings()
     llm_client = OpenAI(
         api_key=settings.openrouter_api_key, base_url=settings.openrouter_base_url

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Critique-refine agent loop for CoreWeave Hacks: Agent Loops (2026-09-12), instrumented with W&B Weave + wandb."
 requires-python = ">=3.11"
 dependencies = [
-    "anthropic>=0.40",
+    "openai>=1.50",
     "weave>=0.51",
     "wandb>=0.18",
     "pydantic-settings>=2.5",

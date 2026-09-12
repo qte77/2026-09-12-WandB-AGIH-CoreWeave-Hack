@@ -402,6 +402,7 @@ source = { editable = "." }
 dependencies = [
     { name = "openai" },
     { name = "pydantic-settings" },
+    { name = "python-dotenv" },
     { name = "typesafe-sdk" },
     { name = "wandb" },
     { name = "weave" },
@@ -416,6 +417,7 @@ dev = [
 requires-dist = [
     { name = "openai", specifier = ">=1.50" },
     { name = "pydantic-settings", specifier = ">=2.5" },
+    { name = "python-dotenv", specifier = ">=1.0" },
     { name = "typesafe-sdk", specifier = ">=0.1" },
     { name = "wandb", specifier = ">=0.18" },
     { name = "weave", specifier = ">=0.51" },

@@ -62,9 +62,13 @@ def run_all() -> list[TaskOutcome]:
     )
     typesafe_client = TypeSafeClient(api_key=settings.typesafe_api_key)
 
-    weave.init(f"{settings.wandb_entity or ''}/{settings.wandb_project}".lstrip("/"))
+    # weave.init() requires "entity/project" explicitly - unlike wandb.init(), it won't
+    # resolve a default entity on its own - so fall back to the account's default here.
+    entity = settings.wandb_entity or wandb.Api().default_entity
+
+    weave.init(f"{entity}/{settings.wandb_project}")
     wandb.init(
-        entity=settings.wandb_entity,
+        entity=entity,
         project=settings.wandb_project,
         job_type="critique-refine-loop",
     )

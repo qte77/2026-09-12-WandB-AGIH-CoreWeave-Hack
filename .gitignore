@@ -22,4 +22,7 @@ build/
 # W&B local run artifacts
 wandb/
 
+# marimo session cache
+notebooks/__marimo__/
+
 .DS_Store

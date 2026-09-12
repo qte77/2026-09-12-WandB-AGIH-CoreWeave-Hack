@@ -19,6 +19,19 @@ SYSTEM_PROMPT = (
 )
 
 
+def _strip_markdown_fences(text: str) -> str:
+    """Models routinely wrap code in ```python fences despite instructions not to -
+    stripping defensively here is more reliable than tightening the prompt further."""
+    stripped = text.strip()
+    if stripped.startswith("```"):
+        lines = stripped.splitlines()
+        lines = lines[1:]  # drop opening ``` or ```python
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        stripped = "\n".join(lines)
+    return stripped.strip()
+
+
 @weave.op()
 def attempt_task(client: OpenAI, settings: Settings, task: Task) -> str:
     response = client.chat.completions.create(
@@ -31,7 +44,7 @@ def attempt_task(client: OpenAI, settings: Settings, task: Task) -> str:
             },
         ],
     )
-    return (response.choices[0].message.content or "").strip()
+    return _strip_markdown_fences(response.choices[0].message.content or "")
 
 
 @weave.op()
@@ -58,4 +71,4 @@ def refine_task(
             },
         ],
     )
-    return (response.choices[0].message.content or "").strip()
+    return _strip_markdown_fences(response.choices[0].message.content or "")

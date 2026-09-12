@@ -4,6 +4,29 @@ Consolidated from this session's research. Superseded/updated by the plan's own 
 they ever diverge — `../RDI-AgentBeats-MAS-GraphJudge/docs/plans/0001-agent-oversight-self-evolution.md`
 is still the live source of truth for what's built/next; this file is the research record.
 
+## Submission rules (relayed by the user from kickoff, 2026-09-12 — supersedes the vehicle choice below)
+
+- **Deadline: Sun Sept 13, 1:00pm PT** — matches event-page logistics, no change.
+- **The GitHub project must have been created today, with no prior work carried in.** This
+  invalidates `RDI-AgentBeats-MAS-GraphJudge` as the submission vehicle — that repo's Tier1-4
+  evaluator code predates 2026-09-12 (commits #3/#5/#16/#19 etc.). **The actual submission must be
+  built fresh in this repo** (`2026-09-12-WandB-AGIH-CoreWeave-Hack`, confirmed created today —
+  single placeholder commit before today's work started). MAS-GraphJudge's *design ideas*
+  (critique-refine loop shape, graph-metric evaluation) can inform the fresh build; its *code and
+  repo* cannot be the submission. **Unconfirmed and asked of the user**: whether "GitHub account"
+  in the relayed rule means a literally new account, or just a new repo under the existing
+  `qte77` account (assumed, pending confirmation) — a new-account requirement would invalidate the
+  PRs already opened under `qte77` and needs a different remediation.
+- **W&B (wandb.ai) is required for at least traces** — not optional; Weave instrumentation must be
+  real, not a stretch goal.
+- **Integrate sponsor components early** — wire Weave (and any other sponsor tool used) in from the
+  first meaningful piece of code, not bolted on at the end.
+- **Use sponsor tools** (plural) — reinforces the earlier "unexpected value" side-track adds
+  (Best Use of Weave / ARIA / marimo) as more than optional bonus points.
+- **Commit often** — likely because judges/rules can audit commit timestamps to confirm work was
+  actually done during the event window, not dumped in one late commit. Build incrementally, commit
+  small and frequently from here on.
+
 ## Event logistics (verified from the actual event page, 2026-09-11)
 
 - Two-day event: Sat Sept 12 (9am breakfast, 10:30am kickoff, **11:15am hacking starts**, 6:30pm

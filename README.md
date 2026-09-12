@@ -34,16 +34,16 @@ See the plan's own **Remaining-work table** (single source of truth) plus:
 
 Primary track: Most Production-Ready (~80/20 over Best Loop Design), of **7 total tracks** — see
 `findings.md` for the full list and the 2 near-free side-track adds (ARIA, marimo) worth stacking.
-Vehicle: `RDI-AgentBeats-MAS-GraphJudge` — Tier 4 oversight/mid-turn-steering (Astra) + a
-critique-refine loop over existing Tier1/Tier2 evaluators, instrumented with W&B Weave + run in
-W&B Sandboxes, OpenRouter as fallback provider. Not claimed as a novel loop shape (Self-Refine/
-Reflexion lineage) — the defensible claim is interpretable post-hoc graph metrics feeding
-prompt/behavior refinement, no training/weights.
+**Build location resolved by submission rules, not preference: this repo (created today) is the
+actual codebase.** `RDI-AgentBeats-MAS-GraphJudge` predates today and can only inform *design*
+(critique-refine loop shape, graph-metric evaluation) — its code/repo cannot be the submission per
+the "no prior work" rule. See `findings.md`'s "Submission rules" section for the full constraint
+list (Weave-for-traces mandatory, sponsor tools, commit often) and one still-open question about
+whether the rule requires a new GitHub *account* as well as a new repo.
 
 ## Repo state (2026-09-12)
 
-This folder is now pushed to `origin` (`qte77/2026-09-12-WandB-AGIH-CoreWeave-Hack`) — PR #1 open
-with these working notes. `RDI-AgentBeats-MAS-GraphJudge`'s plan 0001 has PR #20 open with the
-critique-refine pivot + track/judge-alignment corrections. **Still open: whether this repo stays a
-submission wrapper (docs + demo links, code stays in the vehicle repo) or becomes the actual build
-location** — ask before assuming either way if resuming this session.
+This folder is pushed to `origin` (`qte77/2026-09-12-WandB-AGIH-CoreWeave-Hack`) — PR #1 open with
+these working notes. `RDI-AgentBeats-MAS-GraphJudge`'s plan 0001 has PR #20 open, but that repo is
+no longer the submission vehicle (see Target above) — it stays a design reference only. **Actual
+implementation for this arc starts fresh in this repo**, not yet begun as of this note.

@@ -87,4 +87,155 @@ TASKS: list[Task] = [
             "assert running_total([-1, 1, -1]) == [-1, 0, -1]\n"
         ),
     ),
+    Task(
+        id="fix_dedupe_preserve_order",
+        prompt=(
+            "Fix the function `dedupe_preserve_order(items)` below so it removes duplicates "
+            "while preserving the order of first occurrence. Return ONLY the corrected "
+            "Python source for the function, no explanation, no markdown fences."
+        ),
+        starter_code=(
+            "def dedupe_preserve_order(items):\n"
+            "    return list(set(items))\n"  # bug: set() does not preserve order
+        ),
+        test_code=(
+            "from candidate import dedupe_preserve_order\n"
+            "assert dedupe_preserve_order(['c', 'a', 'c', 'b', 'a', 'd']) == ['c', 'a', 'b', 'd']\n"
+            "assert dedupe_preserve_order(['banana', 'apple', 'banana', 'cherry']) == "
+            "['banana', 'apple', 'cherry']\n"
+            "assert dedupe_preserve_order([]) == []\n"
+            "assert dedupe_preserve_order(['x']) == ['x']\n"
+        ),
+    ),
+    Task(
+        id="fix_flatten_one_level",
+        prompt=(
+            "Fix the function `flatten_one_level(nested)` below so it flattens ONLY ONE "
+            "level of nested lists (not fully recursive). Return ONLY the corrected Python "
+            "source for the function, no explanation, no markdown fences."
+        ),
+        starter_code=(
+            "def flatten_one_level(nested):\n"
+            "    result = []\n"
+            "    for item in nested:\n"
+            "        if isinstance(item, list):\n"
+            "            result.extend(flatten_one_level(item))\n"  # bug: recurses fully
+            "        else:\n"
+            "            result.append(item)\n"
+            "    return result\n"
+        ),
+        test_code=(
+            "from candidate import flatten_one_level\n"
+            "assert flatten_one_level([[1, 2], [3, [4, 5]]]) == [1, 2, 3, [4, 5]]\n"
+            "assert flatten_one_level([1, [2, 3], 4]) == [1, 2, 3, 4]\n"
+            "assert flatten_one_level([]) == []\n"
+            "assert flatten_one_level([[1, [2]], 3]) == [1, [2], 3]\n"
+        ),
+    ),
+    Task(
+        id="fix_mutable_default_arg",
+        prompt=(
+            "Fix the function `add_item(item, target=None)` below — it has the classic "
+            "Python mutable-default-argument bug, where separate calls without an explicit "
+            "`target` end up sharing (and accumulating into) the same list. Return ONLY the "
+            "corrected Python source for the function, no explanation, no markdown fences."
+        ),
+        starter_code=(
+            "def add_item(item, target=[]):\n"  # bug: mutable default argument
+            "    target.append(item)\n"
+            "    return target\n"
+        ),
+        test_code=(
+            "from candidate import add_item\n"
+            "result1 = add_item(1)\n"
+            "result2 = add_item(2)\n"
+            "assert result1 == [1], f'expected [1], got {result1}'\n"
+            "assert result2 == [2], f'expected [2], got {result2}'\n"
+            "assert add_item('a', ['x']) == ['x', 'a']\n"
+        ),
+    ),
+    Task(
+        id="fix_binary_search",
+        prompt=(
+            "Fix the function `binary_search(arr, target)` below (arr is sorted ascending) "
+            "so it returns the index of `target`, or -1 if not present. Return ONLY the "
+            "corrected Python source for the function, no explanation, no markdown fences."
+        ),
+        starter_code=(
+            "def binary_search(arr, target):\n"
+            "    low, high = 0, len(arr) - 1\n"
+            "    while low <= high:\n"
+            "        mid = (low + high) // 2\n"
+            "        if arr[mid] == target:\n"
+            "            return mid\n"
+            "        elif arr[mid] > target:\n"  # bug: comparison direction inverted
+            "            low = mid + 1\n"
+            "        else:\n"
+            "            high = mid - 1\n"
+            "    return -1\n"
+        ),
+        test_code=(
+            "from candidate import binary_search\n"
+            "arr = [1, 3, 5, 7, 9, 11]\n"
+            "assert binary_search(arr, 7) == 3\n"
+            "assert binary_search(arr, 1) == 0\n"
+            "assert binary_search(arr, 11) == 5\n"
+            "assert binary_search(arr, 4) == -1\n"
+            "assert binary_search([], 5) == -1\n"
+        ),
+    ),
+    Task(
+        id="fix_merge_intervals",
+        prompt=(
+            "Fix the function `merge_intervals(intervals)` below so it merges overlapping "
+            "AND touching (end == next start) intervals, given a list of (start, end) "
+            "tuples. Return ONLY the corrected Python source for the function, no "
+            "explanation, no markdown fences."
+        ),
+        starter_code=(
+            "def merge_intervals(intervals):\n"
+            "    if not intervals:\n"
+            "        return []\n"
+            "    intervals = sorted(intervals)\n"
+            "    merged = [intervals[0]]\n"
+            "    for start, end in intervals[1:]:\n"
+            "        last_start, last_end = merged[-1]\n"
+            "        if start < last_end:\n"  # bug: excludes touching intervals (start == last_end)
+            "            merged[-1] = (last_start, max(last_end, end))\n"
+            "        else:\n"
+            "            merged.append((start, end))\n"
+            "    return merged\n"
+        ),
+        test_code=(
+            "from candidate import merge_intervals\n"
+            "assert merge_intervals([(1, 3), (2, 6), (8, 10), (15, 18)]) == "
+            "[(1, 6), (8, 10), (15, 18)]\n"
+            "assert merge_intervals([(1, 4), (4, 5)]) == [(1, 5)]\n"
+            "assert merge_intervals([]) == []\n"
+            "assert merge_intervals([(1, 4)]) == [(1, 4)]\n"
+        ),
+    ),
+    Task(
+        id="fix_word_frequency",
+        prompt=(
+            "Fix the function `word_frequency(text)` below so it counts word frequencies "
+            "case-insensitively and ignores punctuation. Return ONLY the corrected Python "
+            "source for the function, no explanation, no markdown fences."
+        ),
+        starter_code=(
+            "def word_frequency(text):\n"
+            "    words = text.split()\n"  # bug: no case-folding, no punctuation stripping
+            "    freq = {}\n"
+            "    for word in words:\n"
+            "        freq[word] = freq.get(word, 0) + 1\n"
+            "    return freq\n"
+        ),
+        test_code=(
+            "from candidate import word_frequency\n"
+            "result = word_frequency('The cat sat. The CAT ran!')\n"
+            "assert result == {'the': 2, 'cat': 2, 'sat': 1, 'ran': 1}, result\n"
+            "assert word_frequency('') == {}\n"
+            "assert word_frequency('Hi, hi!') == {'hi': 2}\n"
+        ),
+    ),
 ]

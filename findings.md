@@ -4,6 +4,28 @@ Consolidated from this session's research. Superseded/updated by the plan's own 
 they ever diverge — `../RDI-AgentBeats-MAS-GraphJudge/docs/plans/0001-agent-oversight-self-evolution.md`
 is still the live source of truth for what's built/next; this file is the research record.
 
+## W&B Serverless Sandboxes — investigated, not shipped (timeboxed 45 min, 2026-09-12)
+
+- **The Python SDK is real**: not `wandb.sandbox` (deprecated, warns "Use the `cwsandbox`
+  package directly instead") but the standalone `cwsandbox` PyPI package (`cwsandbox==1.14.2`,
+  confirmed installable). Rich API: `Sandbox.run(*cmd, ...)`, `.exec()`, `.write_file()`,
+  `.wait_until_complete()`, `.stream_logs()`, etc. — genuinely built for "run this untrusted
+  code, get the result," not a stub.
+- **Auth works**: importing `wandb.sandbox` (even though it's deprecated) has the side effect of
+  installing a wandb-based auth provider for `cwsandbox` — confirmed via the log line "Loaded
+  credentials for https://api.wandb.ai from WANDB_API_KEY." No separate token needed.
+- **Blocked on entitlement, not code**: `Sandbox.run(...)` reaches the real backend and fails
+  with `PERMISSION_DENIED: sandboxes not enabled for this organization` (entity `w77`). This is
+  an account-access question, not something more integration code fixes — **ask at the sponsor
+  booth whether Sandboxes needs an explicit opt-in for hackathon accounts**, then retry.
+- **Decision**: kept the local subprocess execution (`evaluator.py`) as what actually runs the
+  demo. Removed the `cwsandbox` dependency again (`uv remove cwsandbox`) rather than leave an
+  unusable code path in the shipped repo — per the timebox, a working fallback beats an unshipped
+  integration. If entitlement gets enabled before the deadline, the swap point is
+  `evaluator.execute_candidate()`, and the exact working call shape is `Sandbox.run('python3',
+  'run_test.py', request_timeout_seconds=...)` (note: `max_timeout_seconds` was removed in
+  cwsandbox 1.x, it's `request_timeout_seconds` now) then `.wait_until_complete()`.
+
 ## Real run results (this repo, not the design-reference repo)
 
 - **Run 1** (`hngcc7co`, 3 tasks, pre-fence-fix): all 3 passed in exactly 2 iterations each — later

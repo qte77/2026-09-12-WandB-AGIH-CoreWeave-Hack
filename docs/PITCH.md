@@ -52,6 +52,7 @@
 - Not tested against a public benchmark (HumanEval etc.) — 9 hand-authored tasks, each
   individually verified (buggy version fails, hand-written correct fix passes) before any
   real LLM/API spend. Say this plainly if asked "is this a real benchmark."
-- Execution isolation: check findings.md's Sandboxes entry before the pitch — local
-  subprocess execution (hard timeout) is the baseline; only claim W&B Sandboxes if
-  findings.md confirms it actually ran there.
+- Execution isolation is a local subprocess with a 10s timeout, not W&B Sandboxes. Sandboxes
+  was investigated for real (working SDK, working auth) but blocked on org entitlement
+  ("sandboxes not enabled for this organization" — see findings.md). If asked, say exactly
+  that: the integration is real and one enablement step away, not vaporware, not shipped.

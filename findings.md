@@ -4,6 +4,29 @@ Consolidated from this session's research. Superseded/updated by the plan's own 
 they ever diverge — `../RDI-AgentBeats-MAS-GraphJudge/docs/plans/0001-agent-oversight-self-evolution.md`
 is still the live source of truth for what's built/next; this file is the research record.
 
+## Real run results (this repo, not the design-reference repo)
+
+- **Run 1** (`hngcc7co`, 3 tasks, pre-fence-fix): all 3 passed in exactly 2 iterations each — later
+  diagnosed as a harness bug (LLM wrapped answers in \`\`\`python fences the system prompt
+  forbade, which is a SyntaxError, not a logic failure; the underlying fix was often already
+  correct on attempt 1). Fixed in commit `8f7eec5`. Don't cite this run's numbers as real signal.
+- **Run 2** (`cc3skn3u`, 9 tasks, single model `anthropic/claude-sonnet-5`, post-fence-fix): **9/9
+  passed on iteration 1.** Real, honest result — Sonnet 5 alone didn't need the loop for any of
+  these tasks. Good headline for the honesty section of the pitch, bad for demoing the loop itself
+  (critique-refine and the TypeSafe triage step never fire when the first attempt is always right).
+- **Run 3** (`23dnrd8h`, 9 tasks, draft-then-escalate cascade: `liquid/lfm-2.5-2.6b:free` drafts,
+  `anthropic/claude-sonnet-5` refines): **8/9 passed on iteration 1, 1/9 (`fix_binary_search`)
+  needed escalation** — TypeSafe's `Choice` classified the failure as `logic_error` (verified via
+  `wandb.Api().run(...).history()`, not just trusted from the console log), refine fixed it, final
+  pass rate 100%. This is the run that actually demonstrates the loop, TypeSafe triage, and the
+  cascade all firing for real. **Use this run for the demo.**
+- All three runs: https://wandb.ai/w77/coreweave-hacks-2026-09-12
+
+## Punch list before the 1pm PT deadline
+
+- [ ] **PR #1 on `2026-09-12-WandB-AGIH-CoreWeave-Hack` needs a human Merge (not squash)** —
+  squashing would collapse the "commit often" incremental history the rules ask for.
+
 ## Submission rules (relayed by the user from kickoff, 2026-09-12 — supersedes the vehicle choice below)
 
 - **Deadline: Sun Sept 13, 1:00pm PT** — matches event-page logistics, no change.

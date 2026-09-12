@@ -75,9 +75,21 @@ is still the live source of truth for what's built/next; this file is the resear
   Blackwell (96GB VRAM) notebooks, 12hr hard session cap, 90min idle auto-shutdown, default 4
   CPU/32GB RAM. No GPU dependency in our plan (no weight training in scope), so this remains a pure
   optional add-on — now relevant only because "Best Use of marimo" ($500) is a named track.
-- **TypeSafe AI** (Bronze sponsor): **re-confirmed 2026-09-12 via direct fetch of typesafe.ai** —
-  company is "operating in stealth," no public API/SDK/pricing/product name. Don't build against
-  it; skip the "Best Use of TypeSafe AI" track — there's nothing to integrate.
+- **TypeSafe AI** (Bronze sponsor): **correction, 2026-09-12, later same day** — the earlier
+  "stealth, no public API" finding is now stale. Their marketing site (typesafe.ai) still reads as
+  stealth, but `github.com/typesafe-ai` has public `typesafe-sdk-python` and `typesafe-sdk-js`
+  repos (pushed 2026-09-11/12 — literally around this hackathon's start) and a full docs site at
+  docs.typesafe.ai. Real product: **"System One"** models (flagship: `jev-latest`) — fast,
+  calibrated structured-decision primitives (`Choice`, `Score`, `Noul`) via `POST
+  https://api.typesafe.ai/v1/systemone` or the `typesafe-sdk` Python/JS packages (confirmed
+  installable: `typesafe-sdk==0.5.7` resolves from PyPI). Not a general chat/completion API —
+  narrow, cheap, fast structured judgments, explicitly positioned as an alternative to using an LLM
+  for classification/scoring. Has cookbooks for exactly our domain ("Guardrails for LLMs",
+  "Classifying RAG passages") and a **drop-in Claude Code agent skill**
+  (`claude plugin marketplace add typesafe-ai/skills` + `claude plugin install typesafe@typesafe-ai`).
+  **Integrated 2026-09-12** as the critique-refine loop's failure-triage step (`triage.py`,
+  `Choice` question classifying each test failure before refine) — a genuinely different signal
+  than another LLM call, not a bolt-on. "Best Use of TypeSafe AI" is back in scope.
 
 ## What got rejected, and why (don't re-litigate without new information)
 
@@ -140,6 +152,9 @@ A6d/A8 rather than duplicated here in full:
    applied structurally (graph) instead of per-output. Pitch/demo-script change only, folds into C3.
 4. Lower priority, skip unless time remains: Best Social Media demo ($1,000) — a short clip of the
    robot dog/humanoid + one line on the loop; owner-gated content task, not agent build time.
+5. **Superseded 2026-09-12 (later same day)**: TypeSafe AI turned out to have a real, current API
+   (see corrected Sponsor stack entry above) — now integrated as the failure-triage step, so "Best
+   Use of TypeSafe AI" is realistically in scope too, not skipped.
 
 ## Git/infra state as of 2026-09-12
 

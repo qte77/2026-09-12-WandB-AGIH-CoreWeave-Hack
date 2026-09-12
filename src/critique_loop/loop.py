@@ -1,10 +1,10 @@
-"""The critique-refine loop: attempt -> execute -> (on failure) refine -> re-execute.
+"""The critique-refine loop: attempt -> execute -> (on failure) triage+refine -> re-execute.
 
-Weave instrumentation is intentionally minimal and early: `weave.init()` auto-traces every
-Anthropic call (including any tool use) with zero extra code, and `@weave.op()` on the
-orchestration functions gives the trace a clean session/turn/step shape. A classic
-`wandb.log()` run records per-iteration pass/fail so W&B ARIA (which reads classic Runs, not
-Weave traces) has real data to analyze.
+Weave instrumentation is deliberately explicit rather than relying on provider auto-patching
+(see agent.py): `weave.init()` first, then `@weave.op()` on every LLM/TypeSafe-touching
+function, giving the trace a clean session/turn/step shape regardless of backend. A classic
+`wandb.log()` run records per-iteration pass/fail (and the diagnosed failure category) so
+W&B ARIA — which reads classic Runs, not Weave traces — has real data to analyze.
 """
 
 from dataclasses import dataclass
@@ -12,11 +12,13 @@ from dataclasses import dataclass
 import wandb
 import weave
 from openai import OpenAI
+from typesafe_sdk import TypeSafeClient
 
 from critique_loop.agent import attempt_task, refine_task
 from critique_loop.evaluator import execute_candidate
 from critique_loop.settings import Settings, get_settings
 from critique_loop.tasks import TASKS, Task
+from critique_loop.triage import classify_failure
 
 
 @dataclass(frozen=True)
@@ -27,13 +29,17 @@ class TaskOutcome:
 
 
 @weave.op()
-def run_task(client: OpenAI, settings: Settings, task: Task) -> TaskOutcome:
-    code = attempt_task(client, settings, task)
+def run_task(
+    llm_client: OpenAI, typesafe_client: TypeSafeClient, settings: Settings, task: Task
+) -> TaskOutcome:
+    code = attempt_task(llm_client, settings, task)
     result = execute_candidate(code, task.test_code)
     iteration = 1
+    failure_category = ""
 
     while not result.passed and iteration < settings.max_refine_iterations:
-        code = refine_task(client, settings, task, code, result.output)
+        failure_category = classify_failure(typesafe_client, result.output)
+        code = refine_task(llm_client, settings, task, code, result.output, failure_category)
         result = execute_candidate(code, task.test_code)
         iteration += 1
 
@@ -42,6 +48,7 @@ def run_task(client: OpenAI, settings: Settings, task: Task) -> TaskOutcome:
             "task_id": task.id,
             "passed": result.passed,
             "iterations_used": iteration,
+            "last_failure_category": failure_category,
         }
     )
     return TaskOutcome(task_id=task.id, passed=result.passed, iterations_used=iteration)
@@ -50,7 +57,10 @@ def run_task(client: OpenAI, settings: Settings, task: Task) -> TaskOutcome:
 @weave.op()
 def run_all() -> list[TaskOutcome]:
     settings = get_settings()
-    client = OpenAI(api_key=settings.openrouter_api_key, base_url=settings.openrouter_base_url)
+    llm_client = OpenAI(
+        api_key=settings.openrouter_api_key, base_url=settings.openrouter_base_url
+    )
+    typesafe_client = TypeSafeClient(api_key=settings.typesafe_api_key)
 
     weave.init(f"{settings.wandb_entity or ''}/{settings.wandb_project}".lstrip("/"))
     wandb.init(
@@ -59,7 +69,7 @@ def run_all() -> list[TaskOutcome]:
         job_type="critique-refine-loop",
     )
 
-    outcomes = [run_task(client, settings, task) for task in TASKS]
+    outcomes = [run_task(llm_client, typesafe_client, settings, task) for task in TASKS]
 
     pass_rate = sum(o.passed for o in outcomes) / len(outcomes)
     wandb.log({"final_pass_rate": pass_rate})

@@ -41,6 +41,7 @@ def refine_task(
     task: Task,
     previous_code: str,
     failure_output: str,
+    failure_category: str,
 ) -> str:
     response = client.chat.completions.create(
         model=settings.openrouter_model,
@@ -51,6 +52,7 @@ def refine_task(
                 "content": (
                     f"{task.prompt}\n\nYour previous attempt:\n```python\n{previous_code}\n```"
                     f"\n\nRunning the tests against it failed with:\n```\n{failure_output}\n```"
+                    f"\n\nDiagnosed failure category: {failure_category}"
                     "\n\nFix it. Reply with ONLY the corrected function's source code."
                 ),
             },

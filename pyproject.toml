@@ -8,6 +8,7 @@ dependencies = [
     "weave>=0.51",
     "wandb>=0.18",
     "pydantic-settings>=2.5",
+    "typesafe-sdk>=0.1",
 ]
 
 [dependency-groups]

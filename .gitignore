@@ -3,6 +3,9 @@
 .env.*
 !.env.example
 
+# Agent-memory tooling seed, not project content
+MEMORY.md
+
 # Python
 __pycache__/
 *.pyc

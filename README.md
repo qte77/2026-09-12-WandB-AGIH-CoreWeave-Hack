@@ -1,49 +1,71 @@
-# CoreWeave Hacks: Agent Loops — 2026-09-12
+# CoreWeave Hacks: Agent Loops — Critique-Refine Loop with TypeSafe Triage
 
-Working folder for this hackathon. Hacking Sat Sep 12 11:15am → submissions due Sun Sep 13 1:00pm.
-Open this folder to resume — it's the entry point, not a duplicate of the other artifacts below.
+Hackathon submission for **CoreWeave Hacks: Agent Loops** (2026-09-12/13, AGI House). Built
+entirely in this repo, created 2026-09-12, per the event's no-prior-work rule.
 
-## Files in this folder
+## What this is
 
-- **`findings.md`** — consolidated research record: event logistics, sponsor-stack verification,
-  rejected alternatives + why, SOTA honesty notes, competitive positioning, git/infra state.
-- **`handoff.md`** — session-handoff narrative (copy of `../.claude/handoffs/2026-09-12-coreweave-hacks-prep.md`,
-  kept there too since that's Claude Code's own handoff convention — this is the working-folder copy).
+A small, real critique-refine agent loop: a cheap draft model attempts a bug fix, the fix is
+graded by **actually executing it against real tests** (not another LLM's opinion of itself),
+and on failure **TypeSafe's `Choice` primitive diagnoses why** before a stronger model refines
+it. Instrumented end-to-end with **W&B Weave** traces and a classic **W&B run**, with
+**OpenRouter** as the provider-agnostic LLM layer (any OpenAI-compatible model/endpoint works).
 
-## Where the live work-in-progress still lives (not copied here — it changes, this folder doesn't)
+Not claimed as a novel loop shape — critique-refine is Self-Refine/Reflexion lineage. The real
+claim is narrower: a draft-then-verify-then-escalate cascade where the escalation trigger is a
+genuine execution failure, diagnosed by a purpose-built classifier, not guessed.
 
-- **Technical plan (single source of truth for what's built/next):**
-  `../RDI-AgentBeats-MAS-GraphJudge/docs/plans/0001-agent-oversight-self-evolution.md`
-- **Full hackathon facts, including still-open conflict-resolution rules for the other two Sept 12
-  events:** Claude memory `project_hackathon_astra_coreweave_2026-09.md`
+## Quickstart
 
-## Open items right now
+```bash
+uv sync
+cp .env.example .env   # fill in WANDB_API_KEY, OPENROUTER_API_KEY, OPENROUTER_MODEL, TYPESAFE_API_KEY
+uv run python -m critique_loop.main
+```
 
-See the plan's own **Remaining-work table** (single source of truth) plus:
+`OPENROUTER_DRAFT_MODEL` is optional — set it to a small/cheap model to see the loop and
+TypeSafe triage actually fire; without it, the same strong model drafts and refines.
 
-1. Fable's de-risking checklist not yet executed: verify real Weave/Sandboxes creds + quota +
-   cold-start latency (now B1's done-when in the plan); pre-stage eval tasks; script/exercise a
-   Sandboxes-down fallback (now part of C2's done-when); time the 90-second pitch.
-2. B2 (new): ask on-site whether "Most Production-Ready" judges the Sunday snapshot or live state
-   at Fully Connected — unconfirmed.
-3. Optional pre-build read: `../ai-agents-research/docs/non-cc/hermes-agent-analysis.md`.
-4. `qte77/qte77#169` still `BLOCKED` on required checks/review (merge conflict itself already
-   fixed) — not investigated.
+## Results — real, not simulated
 
-## Target
+9 hand-authored bug-fix tasks (not a public benchmark — see Honesty below), each independently
+verified (buggy version fails its test, a hand-written correct fix passes) before any real
+LLM/API spend.
 
-Primary track: Most Production-Ready (~80/20 over Best Loop Design), of **7 total tracks** — see
-`findings.md` for the full list and the 2 near-free side-track adds (ARIA, marimo) worth stacking.
-**Build location resolved by submission rules, not preference: this repo (created today) is the
-actual codebase.** `RDI-AgentBeats-MAS-GraphJudge` predates today and can only inform *design*
-(critique-refine loop shape, graph-metric evaluation) — its code/repo cannot be the submission per
-the "no prior work" rule. See `findings.md`'s "Submission rules" section for the full constraint
-list (Weave-for-traces mandatory, sponsor tools, commit often) and one still-open question about
-whether the rule requires a new GitHub *account* as well as a new repo.
+- **Cascade run** (cheap draft model + strong refine model): **8/9 correct on the first try**;
+  the 9th (`fix_binary_search`) failed, TypeSafe classified it `logic_error`, refine fixed it.
+  **Final: 9/9, 100% pass rate.**
+- Live data: https://wandb.ai/w77/coreweave-hacks-2026-09-12
+- Full methodology, every run's numbers, and what didn't work: `findings.md`
 
-## Repo state (2026-09-12)
+## Visualize
 
-This folder is pushed to `origin` (`qte77/2026-09-12-WandB-AGIH-CoreWeave-Hack`) — PR #1 open with
-these working notes. `RDI-AgentBeats-MAS-GraphJudge`'s plan 0001 has PR #20 open, but that repo is
-no longer the submission vehicle (see Target above) — it stays a design reference only. **Actual
-implementation for this arc starts fresh in this repo**, not yet begun as of this note.
+```bash
+uvx marimo run notebooks/loop_viz.py
+```
+
+Pulls real per-task results live from the W&B API — iterations-to-pass per task/run, and the
+distribution of TypeSafe-diagnosed failure categories.
+
+## Docs
+
+- **`findings.md`** — research record, verified sponsor-tool facts (W&B, TypeSafe AI, marimo),
+  every real run's results, the Sandboxes investigation, submission rules.
+- **`docs/PITCH.md`** — 90-second pitch script, demo checklist with live URLs, judge-specific
+  talking points.
+- **`handoff.md`** — session history (historical record, superseded by findings.md for current
+  facts).
+
+## Honesty
+
+- Critique-refine loop: Self-Refine/Reflexion lineage, not novel.
+- Task set: 9 hand-authored coding bugs, not a public benchmark like HumanEval — say so if
+  asked.
+- Execution isolation: a local subprocess with a 10s timeout, not W&B Sandboxes. Sandboxes was
+  investigated for real (working SDK, working auth) but blocked on org entitlement — see
+  findings.md.
+
+## Target track
+
+Most Production-Ready (~80/20 over Best Loop Design), among 7 total tracks (Best Use of Weave,
+ARIA, marimo also realistically in scope) — see `findings.md` for the full breakdown.

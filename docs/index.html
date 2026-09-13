@@ -161,17 +161,20 @@
     classification of what went wrong, not a blind re-ask.
   </p>
 
-  <h2>Real results, not simulated</h2>
+  <h2>Real results, not simulated — 3 repeated runs, not one</h2>
   <p>
     9 hand-authored Elixir tasks, each independently verified — buggy version fails, a correct fix
-    passes — via real <code>elixir</code> execution before any LLM spend. The cheap 2.6B draft
-    model alone solved <span class="stat">3 / 9</span> on the first try. Diagnosis-gated
-    escalation closed the gap to <span class="stat">9 / 9 · 100%</span>, verified via the W&amp;B
-    API, not the console log.
+    passes — via real <code>elixir</code> execution before any LLM spend. Run 3 times: the cheap
+    2.6B draft model's first-try success genuinely varies (<span class="stat">3/9</span>,
+    <span class="stat">1/9</span>, <span class="stat">1/9</span>) — don't trust a single number.
+    What's stable across all 3 runs: diagnosis-gated escalation closed the gap to
+    <span class="stat">9 / 9 · 100%</span> every time, verified via the W&amp;B API, not the
+    console log.
   </p>
   <p>
-    One example: the draft model wrote <code>math:sqrt(n)</code> — valid Erlang, invalid Elixir.
-    TypeSafe correctly diagnosed it as a <code>syntax_or_runtime_error</code>; refine fixed it.
+    <code>fix_is_prime</code> never passed on the first try in any of the 3 runs — one example:
+    the draft model wrote <code>math:sqrt(n)</code>, valid Erlang, invalid Elixir. TypeSafe
+    correctly diagnosed it as a <code>syntax_or_runtime_error</code> each time; refine fixed it.
   </p>
 
   <h2>Tracks — why we entered these</h2>

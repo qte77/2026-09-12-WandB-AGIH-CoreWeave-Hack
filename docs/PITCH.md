@@ -22,11 +22,12 @@
    own op — Weave captured both our clean semantics and the raw provider call for free. Then
    point at the real number: that call spent 1897 of 2000 completion tokens on reasoning
    before answering — a genuine cost signal, not a claimed one.
-4. **The numbers** (20s) — 9 independently-verified Elixir tasks. Draft model alone: only
-   3/9 correct first try (Elixir is rare in training data — the loop has real work to do).
-   5/9 needed one escalation, 1/9 two — the draft model wrote `math:sqrt(n)`, valid Erlang,
-   invalid Elixir; TypeSafe correctly caught it. Final: 9/9, 100%, verified via the wandb API,
-   not the console log.
+4. **The numbers — 3 repeated runs, not one** (20s) — 9 independently-verified Elixir tasks,
+   run 3 times. Draft model's first-try success genuinely varies: 3/9, 1/9, 1/9 (Elixir is rare
+   in training data — the loop has real work to do). What's stable across all 3 runs: **final
+   pass rate hit 9/9, 100%, every time**, and `fix_is_prime` never passed first try in any run —
+   the draft model wrote `math:sqrt(n)` (valid Erlang, invalid Elixir) consistently; TypeSafe
+   correctly caught it each time. Verified via the wandb API, not the console log.
 5. **Honesty line** (15s) — Critique-refine itself is Self-Refine/Reflexion lineage, not new.
    What's real and ours: the escalation trigger is a purpose-built diagnosis, not another
    LLM's opinion — verified end to end, not assumed.

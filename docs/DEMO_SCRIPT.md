@@ -34,9 +34,9 @@ Full pitch with judge talking points: `docs/PITCH.md`. This is the trimmed live-
 
 **[Switch to tab 3 — the W&B run, or say the numbers]**
 
-> "9 independently verified Elixir tasks. Cheap model alone: 3 out of 9 correct first try.
-> Diagnosis-gated escalation: 9 out of 9, 100%, verified through the W&B API — not the console
-> log."
+> "9 independently verified Elixir tasks, run 3 times. Cheap model's first-try success varies —
+> 3, 1, 1 out of 9 across the 3 runs. What doesn't vary: diagnosis-gated escalation hit 9 out of
+> 9, 100%, every single run — verified through the W&B API, not the console log."
 
 **[Close]**
 

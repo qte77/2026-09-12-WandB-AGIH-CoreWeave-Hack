@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jev Gate — CoreWeave Hacks: Agent Loops</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --ink: #17231d; --muted: #5b665f; --paper: #fbfaf6; --card: #ffffff;
+    --line: #dfe0d6; --accent: #ff6d2e; --accent-soft: #fff0e7;
+    --ok: #176b4b; --ok-soft: #e4f4ec;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: #eef1ee; --muted: #a9b3ac; --paper: #14181a; --card: #1c2124;
+             --line: #2c3437; --accent-soft: #2a1c14; --ok-soft: #12261d; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding-block: 48px; background: var(--paper); color: var(--ink);
+         font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { width: min(760px, calc(100% - 40px)); margin: 0 auto; }
+  h1 { font-size: clamp(30px, 5vw, 44px); margin: 0 0 4px; letter-spacing: -0.02em; }
+  .tagline { color: var(--muted); font-size: 18px; margin: 0 0 28px; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
+  .links a { padding: 8px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--line);
+             color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 600; }
+  .links a:hover { border-color: var(--accent); }
+  h2 { font-size: 20px; margin: 40px 0 12px; }
+  p { margin: 0 0 14px; }
+  .loop { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 18px 0 28px; }
+  .step { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+          font-size: 14px; font-weight: 600; }
+  .step.gate { background: var(--accent-soft); border-color: var(--accent); }
+  .arrow { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 28px; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .stat { display: inline-block; background: var(--ok-soft); color: var(--ok); border-radius: 8px;
+          padding: 2px 8px; font-weight: 700; }
+  code { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; font-size: 0.9em; }
+  .honesty { border-left: 3px solid var(--accent); padding: 2px 0 2px 16px; color: var(--muted); font-size: 14px; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Jev Gate</h1>
+  <p class="tagline">A self-correcting agent loop that knows why it failed before it tries again.</p>
+
+  <div class="links">
+    <a href="https://github.com/qte77/2026-09-12-WandB-AGIH-CoreWeave-Hack">GitHub repo</a>
+    <a href="https://wandb.ai/w77/coreweave-hacks-2026-09-12/r/call/01a0982c-49f4-7869-9860-94a71b10f788">Weave call tree (live example)</a>
+    <a href="https://wandb.ai/w77/coreweave-hacks-2026-09-12/runs/8zvt118e">W&amp;B run</a>
+  </div>
+
+  <p>
+    Jev Gate is a critique-refine agent loop that fixes real bugs in <strong>Elixir</strong> code —
+    chosen over a generic Python/LeetCode demo since Elixir is rare enough in most models' training
+    data that the loop has genuine work to do.
+  </p>
+
+  <h2>The loop</h2>
+  <div class="loop">
+    <span class="step">Draft attempt</span><span class="arrow">→</span>
+    <span class="step">Execute for real</span><span class="arrow">→</span>
+    <span class="step gate">TypeSafe diagnoses why</span><span class="arrow">→</span>
+    <span class="step">Refine with diagnosis</span><span class="arrow">→</span>
+    <span class="step">Re-execute</span>
+  </div>
+  <p>
+    A cheap draft model attempts a fix. We <strong>actually execute it against real tests</strong> —
+    pass/fail is execution-graded, never self-reported. On failure, TypeSafe's Jev model (System
+    One's <code>Choice</code> primitive) diagnoses the specific failure class — <code>logic_error</code>,
+    <code>off_by_one</code>, <code>syntax_or_runtime_error</code>, etc. — before a stronger model
+    refines the fix <em>using that diagnosis</em>. Each retry is informed by a calibrated
+    classification of what went wrong, not a blind re-ask.
+  </p>
+
+  <h2>Real results, not simulated</h2>
+  <p>
+    9 hand-authored Elixir tasks, each independently verified (buggy version fails, a correct fix
+    passes) via real <code>elixir</code> execution before any LLM spend. The cheap 2.6B draft model
+    alone solved <span class="stat">3 / 9</span> on the first try. Diagnosis-gated escalation closed
+    the gap to <span class="stat">9 / 9 — 100%</span>, verified via the W&amp;B API, not the console log.
+  </p>
+  <p>
+    One example: the draft model wrote <code>math:sqrt(n)</code> — valid Erlang, invalid Elixir.
+    TypeSafe correctly diagnosed it as a <code>syntax_or_runtime_error</code>; refine fixed it.
+  </p>
+
+  <h2>Sponsor tools — what we actually built, not claimed</h2>
+  <table>
+    <tr><th>Tool</th><th>Used for</th></tr>
+    <tr><td><strong>TypeSafe AI</strong></td><td>The escalation decision itself — <code>classify_failure()</code> calls Jev's <code>Choice</code> primitive on every test failure.</td></tr>
+    <tr><td><strong>W&amp;B Weave</strong></td><td>Explicit <code>@weave.op()</code> on every LLM/TypeSafe call, so the trace stays complete regardless of provider — plus Weave's own auto-instrumented OpenAI spans nest inside for free.</td></tr>
+    <tr><td><strong>W&amp;B (classic)</strong></td><td>A logged Run with per-task/iteration metrics and model config.</td></tr>
+    <tr><td><strong>marimo</strong></td><td>A notebook pulling this data live via <code>wandb.Api()</code> for the two plots above.</td></tr>
+    <tr><td><strong>OpenRouter</strong></td><td>Provider-agnostic LLM layer — the draft and refine models are a config swap, not a code change.</td></tr>
+  </table>
+
+  <h2>Honesty</h2>
+  <p class="honesty">
+    Critique-refine is Self-Refine/Reflexion lineage, not a novel loop shape — we're not claiming
+    otherwise. Not tested against a public benchmark. W&amp;B Serverless Sandboxes was investigated
+    for real (working SDK, working auth) but blocked on org entitlement, so execution runs in a
+    local subprocess with a 10s timeout today, not isolated cloud compute.
+  </p>
+
+  <footer>CoreWeave Hacks: Agent Loops — 2026-09-12/13 · Built entirely in this repo, created 2026-09-12</footer>
+</div>
+</body>
+</html>

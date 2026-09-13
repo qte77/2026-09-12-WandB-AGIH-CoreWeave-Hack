@@ -69,8 +69,8 @@ to see it.
   every real run's results, the Sandboxes investigation, submission rules.
 - **`docs/PITCH.md`** — 90-second pitch script, demo checklist with live URLs, judge-specific
   talking points.
-- **`handoff.md`** — session history (historical record, superseded by findings.md for current
-  facts).
+- **`docs/DEMO_SCRIPT.md`** / **`docs/DEMO_SCRIPT_3MIN.md`** — live-demo scripts (short and
+  full-length), exact tabs/lines/timing.
 
 ## Honesty
 

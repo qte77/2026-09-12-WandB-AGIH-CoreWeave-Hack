@@ -48,11 +48,11 @@ def _(mo):
 
     rows = []
     for run in runs:
-        draft_model = run.config.get("draft_model", "unknown")
-        refine_model = run.config.get("refine_model", "unknown")
+        draft_model = run.config.get("draft_model") or "unknown"
+        refine_model = run.config.get("refine_model") or "unknown"
         label = f"{run.name} (draft={draft_model.split('/')[-1]})"
         for record in run.history(pandas=False):
-            if "task_id" in record:
+            if record.get("task_id") is not None:
                 rows.append(
                     {
                         "run": label,

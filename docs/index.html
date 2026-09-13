@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jev Gate — CoreWeave Hacks: Agent Loops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: light dark;
+    --paper:  oklch(97.5% 0.010 85);
+    --ink:    oklch(22%   0.012 130);
+    --muted:  oklch(50%   0.014 130);
+    --card:   oklch(99%   0.004 85);
+    --line:   oklch(88%   0.010 85);
+    --accent:      oklch(58% 0.150 55);
+    --accent-soft: oklch(94% 0.040 55);
+    --ok:      oklch(46% 0.110 155);
+    --ok-soft: oklch(93% 0.050 155);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:  oklch(19%  0.010 250);
+      --ink:    oklch(93%  0.010 85);
+      --muted:  oklch(67%  0.020 85);
+      --card:   oklch(23%  0.012 250);
+      --line:   oklch(33%  0.015 250);
+      --accent:      oklch(74% 0.140 55);
+      --accent-soft: oklch(28% 0.060 55);
+      --ok:      oklch(72% 0.130 155);
+      --ok-soft: oklch(27% 0.070 155);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding-block: 56px; background: var(--paper); color: var(--ink);
+    font: 400 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    text-wrap: pretty;
+  }
+  .wrap { width: min(720px, calc(100% - 40px)); margin: 0 auto; }
+  h1 {
+    font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700; font-size: clamp(32px, 6vw, 46px); line-height: 1.05;
+    margin: 0 0 8px; letter-spacing: -0.01em;
+  }
+  h2 {
+    font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    font-weight: 500; font-size: 19px; margin: 44px 0 14px; letter-spacing: -0.005em;
+  }
+  .tagline { color: var(--muted); font-size: 19px; margin: 0 0 30px; max-width: 34ch; }
+  p { margin: 0 0 14px; }
+  strong { font-weight: 600; }
+  ul { margin: 0 0 30px; padding-left: 20px; }
+  ul li { margin-bottom: 8px; padding-left: 2px; }
+  ul li::marker { color: var(--accent); }
+
+  .links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 38px; }
+  .links a {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 14px; border-radius: 7px; background: var(--card); border: 1px solid var(--line);
+    color: var(--ink); text-decoration: none; font-size: 14px; font-weight: 600;
+    transition: border-color 0.15s ease;
+  }
+  .links a:hover { border-color: var(--accent); }
+  .links svg { width: 14px; height: 14px; stroke: var(--muted); }
+
+  .loop { display: flex; flex-wrap: wrap; align-items: center; gap: 0; margin: 20px 0 26px; }
+  .step {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 11px 15px; font-size: 13.5px; font-weight: 600; white-space: nowrap;
+  }
+  .step.gate { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+  .loop-arrow { width: 22px; height: 14px; flex: none; margin: 0 4px; }
+  .loop-arrow path { stroke: var(--muted); stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 30px; font-size: 14.5px; }
+  th, td { text-align: left; padding: 10px 12px 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.03em; }
+  td:first-child, th:first-child { width: 30%; white-space: nowrap; }
+
+  .stat {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    display: inline-block; background: var(--ok-soft); color: var(--ok); border-radius: 6px;
+    padding: 2px 9px; font-weight: 600; font-size: 0.95em;
+  }
+  code {
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    background: var(--card); border: 1px solid var(--line); border-radius: 4px;
+    padding: 1.5px 6px; font-size: 0.88em;
+  }
+
+  .honesty {
+    background: var(--card); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px; color: var(--muted); font-size: 14.5px; margin: 0;
+  }
+  .honesty strong { color: var(--ink); }
+
+  footer {
+    margin-top: 52px; padding-top: 20px; border-top: 1px solid var(--line);
+    color: var(--muted); font-size: 13px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Jev Gate</h1>
+  <p class="tagline">A self-correcting agent loop that knows why it failed before it tries again.</p>
+
+  <div class="links">
+    <a href="https://github.com/qte77/2026-09-12-WandB-AGIH-CoreWeave-Hack">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      GitHub repo
+    </a>
+    <a href="https://wandb.ai/w77/coreweave-hacks-2026-09-12/r/call/01a0982c-49f4-7869-9860-94a71b10f788">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M3 12h4l2-7 4 14 2-7h6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Weave call tree
+    </a>
+    <a href="https://wandb.ai/w77/coreweave-hacks-2026-09-12/runs/8zvt118e">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V10M12 19V5M20 19v-6" stroke-width="1.6" stroke-linecap="round"/></svg>
+      W&amp;B run
+    </a>
+  </div>
+
+  <p>
+    Jev Gate is a critique-refine agent loop that fixes real bugs in <strong>Elixir</strong> code —
+    chosen over a generic Python or LeetCode demo, since Elixir is rare enough in most models'
+    training data that the loop has genuine work to do.
+  </p>
+
+  <h2>The loop</h2>
+  <div class="loop">
+    <span class="step">Draft attempt</span>
+    <svg class="loop-arrow" viewBox="0 0 22 14"><path d="M1 7h18m-6-6 6 6-6 6"/></svg>
+    <span class="step">Execute for real</span>
+    <svg class="loop-arrow" viewBox="0 0 22 14"><path d="M1 7h18m-6-6 6 6-6 6"/></svg>
+    <span class="step gate">TypeSafe diagnoses why</span>
+    <svg class="loop-arrow" viewBox="0 0 22 14"><path d="M1 7h18m-6-6 6 6-6 6"/></svg>
+    <span class="step">Refine with diagnosis</span>
+    <svg class="loop-arrow" viewBox="0 0 22 14"><path d="M1 7h18m-6-6 6 6-6 6"/></svg>
+    <span class="step">Re-execute</span>
+  </div>
+  <p>
+    A cheap draft model attempts a fix. We <strong>actually execute it against real tests</strong> —
+    pass/fail is execution-graded, never self-reported. On failure, TypeSafe's Jev model (System
+    One's <code>Choice</code> primitive) diagnoses the specific failure class — <code>logic_error</code>,
+    <code>off_by_one</code>, <code>syntax_or_runtime_error</code>, and so on — before a stronger
+    model refines the fix <em>using that diagnosis</em>. Each retry is informed by a calibrated
+    classification of what went wrong, not a blind re-ask.
+  </p>
+
+  <h2>Real results, not simulated</h2>
+  <p>
+    9 hand-authored Elixir tasks, each independently verified — buggy version fails, a correct fix
+    passes — via real <code>elixir</code> execution before any LLM spend. The cheap 2.6B draft
+    model alone solved <span class="stat">3 / 9</span> on the first try. Diagnosis-gated
+    escalation closed the gap to <span class="stat">9 / 9 · 100%</span>, verified via the W&amp;B
+    API, not the console log.
+  </p>
+  <p>
+    One example: the draft model wrote <code>math:sqrt(n)</code> — valid Erlang, invalid Elixir.
+    TypeSafe correctly diagnosed it as a <code>syntax_or_runtime_error</code>; refine fixed it.
+  </p>
+
+  <h2>Tracks — why we entered these</h2>
+  <ul>
+    <li><strong>Best Loop Design</strong> — the loop is a deliberate escalation gated by a real diagnosis, not blind retry.</li>
+    <li><strong>Most Production-Ready</strong> — execution-graded pass/fail, full observability, honest documented limits.</li>
+    <li><strong>Best Use of Weave</strong> — explicit tracing on every call, plus auto-instrumented provider spans nested for free.</li>
+    <li><strong>Best Use of TypeSafe AI</strong> — Jev's diagnosis is the one decision the entire loop design pivots on.</li>
+    <li><strong>Best Use of marimo</strong> — a working notebook pulling live results, not a placeholder.</li>
+  </ul>
+
+  <h2>Sponsor tools — what we actually built, not claimed</h2>
+  <table>
+    <tr><th>Tool</th><th>Used for</th></tr>
+    <tr><td>TypeSafe AI</td><td>The escalation decision itself — <code>classify_failure()</code> calls Jev's <code>Choice</code> primitive on every test failure.</td></tr>
+    <tr><td>W&amp;B Weave</td><td>Explicit <code>@weave.op()</code> on every LLM/TypeSafe call, so the trace stays complete regardless of provider — Weave's own auto-instrumented OpenAI spans nest inside for free.</td></tr>
+    <tr><td>W&amp;B (classic)</td><td>A logged Run with per-task, per-iteration metrics and model config.</td></tr>
+    <tr><td>marimo</td><td>A notebook pulling this data live via <code>wandb.Api()</code> for the two plots above.</td></tr>
+    <tr><td>OpenRouter</td><td>Provider-agnostic LLM layer — draft and refine models are a config swap, not a code change.</td></tr>
+  </table>
+
+  <h2>Honesty</h2>
+  <p class="honesty">
+    Critique-refine is <strong>Self-Refine/Reflexion lineage, not a novel loop shape</strong> — we're
+    not claiming otherwise. Not tested against a public benchmark. W&amp;B Serverless Sandboxes was
+    investigated for real (working SDK, working auth) but blocked on org entitlement, so execution
+    runs in a local subprocess with a 10-second timeout today, not isolated cloud compute.
+  </p>
+
+  <footer>CoreWeave Hacks: Agent Loops — 2026-09-12/13 · Built entirely in this repo, created 2026-09-12</footer>
+</div>
+</body>
+</html>

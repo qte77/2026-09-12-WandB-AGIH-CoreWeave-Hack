@@ -6,30 +6,34 @@
 
 1. **Problem** (15s) — "Agents that cycle through reasoning and action, catching their own
    mistakes" is the theme. Most loops just re-ask the same model and hope. We wanted the
-   loop to actually *know why* it failed before it tries again.
+   loop to actually *know why* it failed before it tries again — and we wanted a demo that
+   wasn't just another LeetCode-Python-bug fixer, so the agent fixes **Elixir** bugs.
 2. **The loop** (20s) — Draft model attempts a fix → we actually execute it against real
    tests (not another LLM's opinion) → on failure, TypeSafe's `Choice` primitive classifies
    *why* it failed → that diagnosis feeds the refine prompt → a stronger model fixes it →
    re-run. Draft-then-verify-then-escalate, the same shape as TypeSafe's own "SDE cascade."
-3. **What's real, not simulated** (20s) — Show the W&B run: execution-graded pass/fail
-   (real pytest, not self-reported), full Weave trace of the whole session, and the actual
-   TypeSafe classification for the one task that needed it.
-4. **The numbers** (20s) — 9 hand-authored bug-fix tasks, each independently verified before
-   the run. Cheap draft model alone: 8/9 correct on the first try. The 9th
-   (`fix_binary_search`) failed, TypeSafe correctly diagnosed it as a `logic_error`, the
-   loop escalated to the stronger model, and it passed. Final: 9/9, 100% real pass rate.
+3. **What's real, not simulated** (20s) — Show the W&B run: execution-graded pass/fail (real
+   `elixir` execution, not self-reported), full Weave trace of the whole session, and the
+   actual TypeSafe classification for `fix_is_prime` — the case that needed two escalations.
+4. **The numbers** (20s) — 9 hand-authored Elixir bugs (div/rem confusion, MapSet vs
+   Enum.uniq ordering, function-clause-order shadowing, etc.), each independently verified
+   before the run. Cheap 2.6B draft model alone: only 3/9 correct on the first try — Elixir
+   is a much rarer training language than Python, so the loop actually has real work to do.
+   5/9 needed one escalation, 1/9 (`fix_is_prime`) needed two — the draft model wrote
+   `math:sqrt(n)`, valid Erlang, invalid Elixir. TypeSafe correctly diagnosed it. Final: 9/9,
+   100% real pass rate.
 5. **Honesty line** (15s) — Critique-refine is Self-Refine/Reflexion lineage, not a new
    idea — we're not claiming otherwise. What's real here is that a cheap model plus a loop
-   that actually diagnoses its own failures gets you most of the way to what a strong model
-   does alone, at a fraction of the cost — verified, not assumed.
+   that actually diagnoses its own failures closes a real capability gap (a language it
+   barely knows) instead of just hoping a re-ask works — verified, not assumed.
 
 ## Demo checklist — tabs to have open
 
-- **W&B run (the cascade run — use this one, not the single-model runs)**:
-  https://wandb.ai/w77/coreweave-hacks-2026-09-12/runs/23dnrd8h
-- **One Weave call tree** (the `fix_binary_search` escalation — verified via
+- **W&B run (the Elixir cascade run — use this one)**:
+  https://wandb.ai/w77/coreweave-hacks-2026-09-12/runs/8zvt118e
+- **One Weave call tree** (the `fix_is_prime` double-escalation — verified via
   `client.get_call()` to actually be this task, not assumed from print order):
-  https://wandb.ai/w77/coreweave-hacks-2026-09-12/r/call/01a09738-a3fa-7b59-9fbd-68933a1efe0f
+  https://wandb.ai/w77/coreweave-hacks-2026-09-12/r/call/01a0982c-49f4-7869-9860-94a71b10f788
 - **W&B project overview** (for ARIA / Best-Use-of-Weave questions):
   https://wandb.ai/w77/coreweave-hacks-2026-09-12
 - **TypeSafe playground** (console.typesafe.ai/playground) — optional, if a judge asks how

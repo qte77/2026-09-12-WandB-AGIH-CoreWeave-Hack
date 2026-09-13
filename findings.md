@@ -1,5 +1,39 @@
 # Findings — CoreWeave Hacks: Agent Loops (2026-09-12)
 
+## Language switch: Python → Elixir tasks (2026-09-13, submission day)
+
+Feedback: fixing generic Python bugs (is_prime, binary search, etc.) reads as too common a
+demo for an AI-coding-agent hackathon. Switched the 9 tasks to genuine Elixir idioms/gotchas,
+not transliterations: div/2 vs rem/2 confusion, `MapSet` (unordered) vs `Enum.uniq/1`
+(order-preserving) for dedup, function-clause ordering (Elixir tries clauses top-to-bottom — an
+overly general guard first shadows everything below it), `List.flatten/1`'s full recursion vs a
+one-level flatten. Kept the Python harness (`agent.py`/`loop.op`/`settings.py`) exactly as-is —
+Weave/wandb/TypeSafe all operate on text (code, failure output), not on source language, so no
+sponsor-integration code needed to change. Requires `elixir` on PATH (`apt-get install elixir`
+on Debian/Ubuntu) — a new system dependency, documented in README's Quickstart.
+
+**A real authoring bug found and fixed along the way**: Elixir's `2..(n-1)` range is NOT empty
+when `n=2` (unlike Python's `range(2,n)`) — it defaults to a descending 2-element range `[2,1]`
+in Elixir 1.14, which broke the `is_prime(2)` edge case in a first draft of the "correct"
+reference fix. Caught by the same discipline as before: run buggy-fails/correct-passes for
+every task via actual `elixir` execution before spending any real LLM/API calls, not by
+reasoning about Elixir range semantics from memory.
+
+**Run 4** (`8zvt118e`, 9 Elixir tasks, same cascade as Run 3 — `liquid/lfm-2.5-2.6b:free` drafts,
+`anthropic/claude-sonnet-5` refines): genuinely richer variance than the Python runs — 3 tasks
+passed in 1 iteration, 5 in 2, and `fix_is_prime` needed all 3. **Spot-checked, not just
+trusted**: pulled the raw draft output for `fix_is_prime` directly (not from the wandb
+summary) — the small model wrote `math:sqrt(n)` (valid Erlang, invalid Elixir — confusing
+`Module:function()` Erlang syntax with Elixir's `Module.function()`), a genuine small-model
+mistake, not a harness artifact like the earlier markdown-fence bug. TypeSafe correctly
+classified it `syntax_or_runtime_error`. Final: **9/9, 100% pass rate**, with real, honest
+escalation depth this time (not the suspiciously uniform 2-iterations-always from before the
+fence fix). Use this run for the demo, not the Python runs. Full per-task breakdown:
+`fix_is_prime` (3 iter, `syntax_or_runtime_error`), `fix_reverse_words` (1), `fix_running_total`
+(2, `syntax_or_runtime_error`), `fix_dedupe_preserve_order` (2, `logic_error`),
+`fix_flatten_one_level` (2, `syntax_or_runtime_error`), `fix_sign` (1), `fix_binary_search`
+(2, `other`), `fix_merge_intervals` (1), `fix_word_frequency` (2, `syntax_or_runtime_error`).
+
 Consolidated from this session's research. Superseded/updated by the plan's own Status section if
 they ever diverge — `../RDI-AgentBeats-MAS-GraphJudge/docs/plans/0001-agent-oversight-self-evolution.md`
 is still the live source of truth for what's built/next; this file is the research record.

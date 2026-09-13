@@ -5,11 +5,17 @@ entirely in this repo, created 2026-09-12, per the event's no-prior-work rule.
 
 ## What this is
 
-A small, real critique-refine agent loop: a cheap draft model attempts a bug fix, the fix is
-graded by **actually executing it against real tests** (not another LLM's opinion of itself),
-and on failure **TypeSafe's `Choice` primitive diagnoses why** before a stronger model refines
-it. Instrumented end-to-end with **W&B Weave** traces and a classic **W&B run**, with
-**OpenRouter** as the provider-agnostic LLM layer (any OpenAI-compatible model/endpoint works).
+A small, real critique-refine agent loop fixing **Elixir** bugs: a cheap draft model attempts a
+fix, the fix is graded by **actually executing it against real tests** (not another LLM's
+opinion of itself), and on failure **TypeSafe's `Choice` primitive diagnoses why** before a
+stronger model refines it. Instrumented end-to-end with **W&B Weave** traces and a classic
+**W&B run**, with **OpenRouter** as the provider-agnostic LLM layer (any OpenAI-compatible
+model/endpoint works).
+
+Elixir, not Python, on purpose — each bug is a genuine Elixir idiom/gotcha (div/2 vs rem/2
+confusion, `MapSet`'s unordered-ness vs `Enum.uniq/1`'s order-preservation, function-clause
+ordering, `List.flatten/1`'s full recursion vs a one-level flatten), not a generic
+LeetCode-style task ported to a new syntax.
 
 Not claimed as a novel loop shape — critique-refine is Self-Refine/Reflexion lineage. The real
 claim is narrower: a draft-then-verify-then-escalate cascade where the escalation trigger is a
@@ -18,6 +24,7 @@ genuine execution failure, diagnosed by a purpose-built classifier, not guessed.
 ## Quickstart
 
 ```bash
+sudo apt-get install -y elixir   # runtime for the bug-fixing tasks themselves
 uv sync
 cp .env.example .env   # fill in WANDB_API_KEY, OPENROUTER_API_KEY, OPENROUTER_MODEL, TYPESAFE_API_KEY
 uv run python -m critique_loop.main
@@ -28,13 +35,15 @@ TypeSafe triage actually fire; without it, the same strong model drafts and refi
 
 ## Results — real, not simulated
 
-9 hand-authored bug-fix tasks (not a public benchmark — see Honesty below), each independently
-verified (buggy version fails its test, a hand-written correct fix passes) before any real
-LLM/API spend.
+9 hand-authored Elixir bug-fix tasks (not a public benchmark — see Honesty below), each
+independently verified (buggy version fails its test, a hand-written correct fix passes) via
+actual `elixir` execution before any real LLM/API spend.
 
-- **Cascade run** (cheap draft model + strong refine model): **8/9 correct on the first try**;
-  the 9th (`fix_binary_search`) failed, TypeSafe classified it `logic_error`, refine fixed it.
-  **Final: 9/9, 100% pass rate.**
+- **Cascade run** (cheap 2.6B draft model + strong refine model): **3/9 correct on the first
+  try, 5/9 needed one escalation, 1/9 (`fix_is_prime`) needed two** — TypeSafe correctly
+  diagnosed each failure (`syntax_or_runtime_error`, `logic_error`, `other`). Spot-checked the
+  richest case directly: the draft model wrote `math:sqrt(n)` (valid Erlang, invalid Elixir — a
+  genuine small-model mistake, not a harness bug). **Final: 9/9, 100% pass rate.**
 - Live data: https://wandb.ai/w77/coreweave-hacks-2026-09-12
 - Full methodology, every run's numbers, and what didn't work: `findings.md`
 

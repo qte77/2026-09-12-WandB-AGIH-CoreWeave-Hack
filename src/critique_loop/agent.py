@@ -14,13 +14,13 @@ from critique_loop.settings import Settings
 from critique_loop.tasks import Task
 
 SYSTEM_PROMPT = (
-    "You are a precise Python bug-fixer. Reply with ONLY the corrected function's source "
-    "code. No markdown fences, no explanation, no surrounding text."
+    "You are a precise Elixir bug-fixer. Reply with ONLY the corrected `Candidate` "
+    "module's full source code. No markdown fences, no explanation, no surrounding text."
 )
 
 
 def _strip_markdown_fences(text: str) -> str:
-    """Models routinely wrap code in ```python fences despite instructions not to -
+    """Models routinely wrap code in ```elixir fences despite instructions not to -
     stripping defensively here is more reliable than tightening the prompt further."""
     stripped = text.strip()
     if stripped.startswith("```"):
@@ -43,7 +43,7 @@ def attempt_task(client: OpenAI, settings: Settings, task: Task) -> str:
             {"role": "system", "content": SYSTEM_PROMPT},
             {
                 "role": "user",
-                "content": f"{task.prompt}\n\n```python\n{task.starter_code}\n```",
+                "content": f"{task.prompt}\n\n```elixir\n{task.starter_code}\n```",
             },
         ],
     )
@@ -66,10 +66,10 @@ def refine_task(
             {
                 "role": "user",
                 "content": (
-                    f"{task.prompt}\n\nYour previous attempt:\n```python\n{previous_code}\n```"
+                    f"{task.prompt}\n\nYour previous attempt:\n```elixir\n{previous_code}\n```"
                     f"\n\nRunning the tests against it failed with:\n```\n{failure_output}\n```"
                     f"\n\nDiagnosed failure category: {failure_category}"
-                    "\n\nFix it. Reply with ONLY the corrected function's source code."
+                    "\n\nFix it. Reply with ONLY the corrected module's full source code."
                 ),
             },
         ],

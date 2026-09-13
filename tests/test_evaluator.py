@@ -5,13 +5,13 @@ from critique_loop.tasks import TASKS
 def test_execute_candidate_passes_on_correct_code():
     task = next(t for t in TASKS if t.id == "fix_is_prime")
     correct_code = (
-        "def is_prime(n):\n"
-        "    if n < 2:\n"
-        "        return False\n"
-        "    for i in range(2, n):\n"
-        "        if n % i == 0:\n"
-        "            return False\n"
-        "    return True\n"
+        "defmodule Candidate do\n"
+        "  def is_prime(n) when n < 2, do: false\n"
+        "  def is_prime(2), do: true\n"
+        "  def is_prime(n) do\n"
+        "    not Enum.any?(2..(n - 1), fn i -> rem(n, i) == 0 end)\n"
+        "  end\n"
+        "end\n"
     )
     result = execute_candidate(correct_code, task.test_code)
     assert result.passed is True
@@ -26,6 +26,6 @@ def test_execute_candidate_fails_on_buggy_starter_code():
 
 
 def test_execute_candidate_reports_syntax_errors_as_failure():
-    result = execute_candidate("def broken(:\n", "import candidate\n")
+    result = execute_candidate("defmodule Broken do\n", 'Code.require_file("candidate.exs", __DIR__)\n')
     assert result.passed is False
     assert result.output != ""

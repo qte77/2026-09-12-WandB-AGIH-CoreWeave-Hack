@@ -2,57 +2,76 @@
 
 **Recording is on you (owner-gated) — this is the script + checklist, not the video.**
 
-## Script (5 beats, ~90s)
+## Script (5 beats, ~90s) — leads with TypeSafe, then Weave, then the numbers
 
-1. **Problem** (15s) — "Agents that cycle through reasoning and action, catching their own
-   mistakes" is the theme. Most loops just re-ask the same model and hope. We wanted the
-   loop to actually *know why* it failed before it tries again.
-2. **The loop** (20s) — Draft model attempts a fix → we actually execute it against real
-   tests (not another LLM's opinion) → on failure, TypeSafe's `Choice` primitive classifies
-   *why* it failed → that diagnosis feeds the refine prompt → a stronger model fixes it →
-   re-run. Draft-then-verify-then-escalate, the same shape as TypeSafe's own "SDE cascade."
-3. **What's real, not simulated** (20s) — Show the W&B run: execution-graded pass/fail
-   (real pytest, not self-reported), full Weave trace of the whole session, and the actual
-   TypeSafe classification for the one task that needed it.
-4. **The numbers** (20s) — 9 hand-authored bug-fix tasks, each independently verified before
-   the run. Cheap draft model alone: 8/9 correct on the first try. The 9th
-   (`fix_binary_search`) failed, TypeSafe correctly diagnosed it as a `logic_error`, the
-   loop escalated to the stronger model, and it passed. Final: 9/9, 100% real pass rate.
-5. **Honesty line** (15s) — Critique-refine is Self-Refine/Reflexion lineage, not a new
-   idea — we're not claiming otherwise. What's real here is that a cheap model plus a loop
-   that actually diagnoses its own failures gets you most of the way to what a strong model
-   does alone, at a fraction of the cost — verified, not assumed.
+1. **The decision, not the theme** (15s) — Most self-correcting loops just re-ask the same
+   model and hope. Ours makes one real decision: **TypeSafe's `Choice` primitive diagnoses
+   *why* a fix failed** (`logic_error`, `off_by_one`, `syntax_or_runtime_error`...) before
+   anything escalates. That one call is what turns "retry" into a *designed* loop — an
+   Escalation Chain gated by a real diagnosis, not a coin flip. This is the loop design.
+2. **Why that's Best-Loop-Design AND Most-Production-Ready** (20s) — A cheap 2.6B model
+   drafts a fix in **Elixir** (not another generic Python bug — real gotchas: div/rem
+   confusion, MapSet's unordered-ness, function-clause shadowing). We *execute* it against
+   real tests — no self-grading. On failure, TypeSafe's diagnosis routes straight into the
+   refine prompt for a stronger model. Cost scales with genuine difficulty, and the
+   escalation trigger is a calibrated classification, not a guess — that's the production
+   argument and the design argument, from the same one call.
+3. **Show the Weave trace live** (20s) — Open the `fix_is_prime` call tree: `run_task` →
+   `attempt_task` → `classify_failure` → `refine_task` → `classify_failure` → `refine_task`.
+   Point at the nested, auto-instrumented `openai.chat.completions.create` span *inside* our
+   own op — Weave captured both our clean semantics and the raw provider call for free. Then
+   point at the real number: that call spent 1897 of 2000 completion tokens on reasoning
+   before answering — a genuine cost signal, not a claimed one.
+4. **The numbers** (20s) — 9 independently-verified Elixir tasks. Draft model alone: only
+   3/9 correct first try (Elixir is rare in training data — the loop has real work to do).
+   5/9 needed one escalation, 1/9 two — the draft model wrote `math:sqrt(n)`, valid Erlang,
+   invalid Elixir; TypeSafe correctly caught it. Final: 9/9, 100%, verified via the wandb API,
+   not the console log.
+5. **Honesty line** (15s) — Critique-refine itself is Self-Refine/Reflexion lineage, not new.
+   What's real and ours: the escalation trigger is a purpose-built diagnosis, not another
+   LLM's opinion — verified end to end, not assumed.
 
-## Demo checklist — tabs to have open
+## Wow factor, one sentence
 
-- **W&B run (the cascade run — use this one, not the single-model runs)**:
-  https://wandb.ai/w77/coreweave-hacks-2026-09-12/runs/23dnrd8h
-- **One Weave call tree** (the `fix_binary_search` escalation — verified via
-  `client.get_call()` to actually be this task, not assumed from print order):
-  https://wandb.ai/w77/coreweave-hacks-2026-09-12/r/call/01a09738-a3fa-7b59-9fbd-68933a1efe0f
-- **W&B project overview** (for ARIA / Best-Use-of-Weave questions):
-  https://wandb.ai/w77/coreweave-hacks-2026-09-12
-- **TypeSafe playground** (console.typesafe.ai/playground) — optional, if a judge asks how
-  the `Choice` classification actually works.
-- **marimo notebook** (`notebooks/loop_viz.py`, run via `uvx marimo run notebooks/loop_viz.py`)
-  — two real plots: iterations-to-pass per task/run, and the failure-category distribution.
+**You can watch the exact moment a diagnosis — not a guess — decides to escalate, in a live
+trace, on a language the cheap model demonstrably doesn't know well.**
 
-## Judge-specific talking points
+## What to cut if time is short
 
-- **Xiangyi Li (Founder, BenchFlow — agent-skill benchmarking)**: frame this as the same
-  problem BenchFlow builds around — agent self-verification — solved structurally
-  (execute-and-classify) rather than by trusting the model's own claim of success.
-- **Jinjing (Co-founder/CEO, Stably AI — AI-generated self-healing E2E tests)**: the loop's
-  "catch failures, diagnose why, fix, re-verify" shape is the same lifecycle Stably AI
-  automates for test suites — here it's applied to the agent's own code output.
+- Drop ARIA and marimo from the spoken pitch entirely — they're real but not in the top 4
+  target tracks (Best Loop Design, Most Production-Ready, TypeSafe, Weave). Only mention if
+  a judge asks directly.
+- Drop the Self-Refine/Reflexion lineage explanation unless asked — say the one-line honesty
+  version in beat 5 and move on; don't spend demo seconds on academic lineage.
+- Skip the TypeSafe playground tab unless a judge specifically asks how `Choice` works.
+
+## Demo checklist — tabs to have open, in this order
+
+1. **Weave call tree for `fix_is_prime`** (open this FIRST — it's the lead, not a footnote):
+   https://wandb.ai/w77/coreweave-hacks-2026-09-12/r/call/01a0982c-49f4-7869-9860-94a71b10f788
+2. **W&B run** (the Elixir cascade run):
+   https://wandb.ai/w77/coreweave-hacks-2026-09-12/runs/8zvt118e
+3. **W&B project overview** (only if asked about Weave/ARIA more broadly):
+   https://wandb.ai/w77/coreweave-hacks-2026-09-12
+
+## Judge talking points — lead with these two, in this order
+
+- **Emmanuel Turlay (Director of Engineering, leads the Weave team)**: we deliberately used
+  explicit `@weave.op()` wrapping instead of relying only on provider auto-patching, because
+  our provider is swappable (OpenRouter) — and it turns out both fire together, giving clean
+  semantics *and* raw provider detail (token usage, reasoning-token burn) for free.
+- **Xiangyi Li (Founder, BenchFlow — agent-skill benchmarking)**: this is the same problem
+  BenchFlow builds around — agent self-verification — solved structurally (execute-and-
+  classify) instead of trusting the model's own claim of success.
+- (Time permitting) **Jinjing (Co-founder/CEO, Stably AI)**: the "catch failure, diagnose why,
+  fix, re-verify" shape is the same lifecycle Stably AI automates for test suites.
 
 ## What NOT to claim
 
-- Not a novel loop shape — say so if asked (Self-Refine/Reflexion lineage).
-- Not tested against a public benchmark (HumanEval etc.) — 9 hand-authored tasks, each
-  individually verified (buggy version fails, hand-written correct fix passes) before any
-  real LLM/API spend. Say this plainly if asked "is this a real benchmark."
-- Execution isolation is a local subprocess with a 10s timeout, not W&B Sandboxes. Sandboxes
-  was investigated for real (working SDK, working auth) but blocked on org entitlement
-  ("sandboxes not enabled for this organization" — see findings.md). If asked, say exactly
-  that: the integration is real and one enablement step away, not vaporware, not shipped.
+- Not a novel loop shape — Self-Refine/Reflexion lineage, say so if asked.
+- Not a public benchmark — 9 hand-authored Elixir tasks, each independently verified before
+  any real spend.
+- Execution isolation is a local subprocess (10s timeout), not W&B Sandboxes — investigated
+  for real (working SDK, working auth), blocked on org entitlement. Say exactly that if asked.
+- CoreWeave compute itself isn't used — OpenRouter handles the LLM calls. Say so plainly if
+  asked; don't imply otherwise.

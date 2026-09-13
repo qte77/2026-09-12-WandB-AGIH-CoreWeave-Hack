@@ -3,6 +3,9 @@
 Hackathon submission for **CoreWeave Hacks: Agent Loops** (2026-09-12/13, AGI House). Built
 entirely in this repo, created 2026-09-12, per the event's no-prior-work rule.
 
+**Live demo page**: https://qte77.github.io/2026-09-12-WandB-AGIH-CoreWeave-Hack/
+**Live results notebook**: https://qte77.github.io/2026-09-12-WandB-AGIH-CoreWeave-Hack/notebook.html
+
 ## What this is
 
 A small, real critique-refine agent loop fixing **Elixir** bugs: a cheap draft model attempts a
@@ -54,7 +57,9 @@ uvx marimo run notebooks/loop_viz.py
 ```
 
 Pulls real per-task results live from the W&B API — iterations-to-pass per task/run, and the
-distribution of TypeSafe-diagnosed failure categories.
+distribution of TypeSafe-diagnosed failure categories. A static export is also hosted at
+https://qte77.github.io/2026-09-12-WandB-AGIH-CoreWeave-Hack/notebook.html — no setup needed
+to see it.
 
 ## Docs
 

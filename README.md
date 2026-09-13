@@ -3,6 +3,9 @@
 Hackathon submission for **CoreWeave Hacks: Agent Loops** (2026-09-12/13, AGI House). Built
 entirely in this repo, created 2026-09-12, per the event's no-prior-work rule.
 
+**Live demo page**: https://qte77.github.io/2026-09-12-WandB-AGIH-CoreWeave-Hack/
+**Live results notebook**: https://qte77.github.io/2026-09-12-WandB-AGIH-CoreWeave-Hack/notebook.html
+
 ## What this is
 
 A small, real critique-refine agent loop fixing **Elixir** bugs: a cheap draft model attempts a
@@ -39,11 +42,13 @@ TypeSafe triage actually fire; without it, the same strong model drafts and refi
 independently verified (buggy version fails its test, a hand-written correct fix passes) via
 actual `elixir` execution before any real LLM/API spend.
 
-- **Cascade run** (cheap 2.6B draft model + strong refine model): **3/9 correct on the first
-  try, 5/9 needed one escalation, 1/9 (`fix_is_prime`) needed two** — TypeSafe correctly
-  diagnosed each failure (`syntax_or_runtime_error`, `logic_error`, `other`). Spot-checked the
-  richest case directly: the draft model wrote `math:sqrt(n)` (valid Erlang, invalid Elixir — a
-  genuine small-model mistake, not a harness bug). **Final: 9/9, 100% pass rate.**
+- **Cascade run, 3 repeats** (cheap 2.6B draft model + strong refine model): first-try success
+  genuinely varies (3/9, 1/9, 1/9 across the 3 runs) — TypeSafe correctly diagnosed every
+  failure (`syntax_or_runtime_error`, `logic_error`, `other`). What's stable: **final pass rate
+  reached 9/9 (100%) in all 3 runs**, and `fix_is_prime` never passed on the first try in any
+  run — the loop's escalation isn't a one-off fluke fixing an easy case. Spot-checked the
+  richest example directly: the draft model wrote `math:sqrt(n)` (valid Erlang, invalid Elixir —
+  a genuine small-model mistake, not a harness bug).
 - Live data: https://wandb.ai/w77/coreweave-hacks-2026-09-12
 - Full methodology, every run's numbers, and what didn't work: `findings.md`
 
@@ -54,7 +59,9 @@ uvx marimo run notebooks/loop_viz.py
 ```
 
 Pulls real per-task results live from the W&B API — iterations-to-pass per task/run, and the
-distribution of TypeSafe-diagnosed failure categories.
+distribution of TypeSafe-diagnosed failure categories. A static export is also hosted at
+https://qte77.github.io/2026-09-12-WandB-AGIH-CoreWeave-Hack/notebook.html — no setup needed
+to see it.
 
 ## Docs
 
@@ -70,6 +77,8 @@ distribution of TypeSafe-diagnosed failure categories.
 - Critique-refine loop: Self-Refine/Reflexion lineage, not novel.
 - Task set: 9 hand-authored coding bugs, not a public benchmark like HumanEval — say so if
   asked.
+- Numbers are 3 repeated runs, not one — see the table in `findings.md`. First-try success
+  genuinely varies (11-33%); final pass rate (100%) is what's stable across all 3.
 - Execution isolation: a local subprocess with a 10s timeout, not W&B Sandboxes. Sandboxes was
   investigated for real (working SDK, working auth) but blocked on org entitlement — see
   findings.md.

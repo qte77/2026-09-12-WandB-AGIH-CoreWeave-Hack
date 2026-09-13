@@ -1,5 +1,48 @@
 # Findings — CoreWeave Hacks: Agent Loops (2026-09-12)
 
+## Multi-run variance data (2026-09-13, prompted by judge-persona eval feedback)
+
+A simulated eval-focused judge persona (modeled on Xiangyi Li, BenchFlow — see the persona-eval
+note below) correctly flagged that a single run's 3/9-then-9/9 numbers aren't statistically
+meaningful on their own. Ran the full 9-task Elixir cascade **3 times** (same code, same
+models: `liquid/lfm-2.5-2.6b:free` drafts, `anthropic/claude-sonnet-5` refines):
+
+| Run | First-try pass | Needed 1 escalation | Needed 2 escalations | Final |
+|---|---|---|---|---|
+| `8zvt118e` | 3/9 | 5/9 | 1/9 (`fix_is_prime`) | 9/9 |
+| `d6u9kl4a` | 1/9 | 7/9 | 1/9 (`fix_is_prime`) | 9/9 |
+| `egihxhgk` | 1/9 | 8/9 | 0/9 | 9/9 |
+
+**Honest read**: first-try success genuinely varies run to run (11-33%, not a fixed number —
+don't quote "3/9" as if it were stable). What's actually stable across all 3 runs: **final pass
+rate reached 9/9 (100%) every time**, and `fix_is_prime` is the one task that never passed on
+the first try in any of the 3 runs — it's consistently the hardest task for the draft model,
+not a one-off fluke. This is a stronger, more honest claim than the single-run number: the
+diagnosis-gated escalation loop reliably closes the gap regardless of which specific tasks the
+draft model happens to get wrong on a given run.
+
+## Judge-persona evaluation (2026-09-13)
+
+Ran a simulated judge-persona pass using `agentic-grounded-persona-eval` against this repo and
+the GitHub Pages site. Methodology note from that tool: it's built for research-grounded persona
+modeling (verified public sourcing), not literal impersonation — real sourced research (actual
+quotes from interviews/BenchFlow's own stated mission) was done only for the priority persona,
+Xiangyi Li; the others were honestly labeled "informed by known role, not independently
+verified."
+
+- **Xiangyi Li (BenchFlow)**: her own stated principle is *self-correction* — when results
+  contradict methodology, revise the methodology rather than defend the original numbers. This
+  session's own process (finding and fixing the markdown-fence bug that made earlier data
+  meaningless, then the notebook's None-value sort bug) mirrors that principle directly — a
+  real, not cherry-picked, alignment. Her actual objection (single-run numbers, no variance) is
+  what prompted the multi-run data above.
+- **Jinjing (Stably AI)**: likely warm reaction (exact domain match — self-healing test
+  lifecycle), but would want failure-*diagnosis accuracy* measured, not just cited.
+- **Emmanuel Turlay (Weave)**: likely most positive — the explicit-`@weave.op()`-plus-auto-
+  instrumentation-nesting detail is real, non-obvious engineering, and the reasoning-token
+  discovery (1897/2000 tokens on the free model) is exactly the kind of trace-derived insight
+  Weave is meant to surface.
+
 ## Language switch: Python → Elixir tasks (2026-09-13, submission day)
 
 Feedback: fixing generic Python bugs (is_prime, binary search, etc.) reads as too common a

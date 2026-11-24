@@ -1,6 +1,7 @@
 [project]
 name = "critique-loop"
 version = "1.0.0"
+license = "Apache-2.0"
 description = "Jev Gate: a critique-refine agent loop fixing Elixir bugs, with TypeSafe-diagnosed escalation and W&B Weave/wandb instrumentation. CoreWeave Hacks: Agent Loops (2026-09-12/13) submission."
 requires-python = ">=3.11"
 dependencies = [

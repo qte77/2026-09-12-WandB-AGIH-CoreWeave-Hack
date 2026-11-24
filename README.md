@@ -87,3 +87,7 @@ to see it.
 
 Most Production-Ready (~80/20 over Best Loop Design), among 7 total tracks (Best Use of Weave,
 ARIA, marimo also realistically in scope) — see `findings.md` for the full breakdown.
+
+## License
+
+[Apache-2.0](LICENSE).

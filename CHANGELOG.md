@@ -4,6 +4,12 @@ All notable changes to this project are documented here. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.0.0/). This is a one-shot hackathon
 submission with a single tagged release.
 
+## [Unreleased]
+
+### Added
+
+- Licensed under Apache-2.0: `LICENSE`, the `license` field in `pyproject.toml`, and a README section.
+
 ## [1.0.0] - 2026-09-13
 
 ### Added
